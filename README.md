@@ -37,6 +37,8 @@ You need to setup this options:
 - **endpoint**: the url of your ElasticSearch Service.
 - **region**: region where we created our ElasticSearch Service. Need it to AWS credentials request.
 - **days**: number of days that you want maintenance indexes in your ElasticSearch Service. Example, *30*.
+- **regex**: necessary to exclude other index employing **filter_by_regex**. Empty if you don't use it. Valid values **prefix**, **suffix**, **regex** or **timestring**. Link to the doc [here](https://curator.readthedocs.io/en/latest/filters.html).
+- **exclude**: optional variable content used to exclude the name of the index. Empty if you don't use it. Example with one than more prefix, ^(myindexname-|opendistro|.opendistro).*$.
 
 ### AWS Cloudwatch Event Bridge
 

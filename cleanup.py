@@ -1,7 +1,7 @@
 ## Imports
 import boto3
-import curator
 import os
+import curator
 
 from requests_aws4auth import AWS4Auth
 from elasticsearch import Elasticsearch, RequestsHttpConnection
@@ -10,6 +10,8 @@ from elasticsearch import Elasticsearch, RequestsHttpConnection
 endpoint = os.environ['endpoint'] # Provide the elasticsearch endpoint
 region = os.environ['region'] # Provide the region
 days = int(os.environ['days']) # Number of days to maintenance
+regex = os.environ['regex'] # Kind type for regex filter
+exclude = os.environ['exclude'] # Exclude index that you don't want to delete
 
 service = 'es'
 credentials = boto3.Session().get_credentials()
@@ -29,9 +31,15 @@ def main(event, context):
     
     # Create the index list and filter, excluding .kibana index
     index_list = curator.IndexList(es)
-
     index_list.filter_kibana(exclude=True)
-    index_list.filter_by_age(source='creation_date', direction='older', unit='days', unit_count=days)
+
+    # Optionally, if field filter is not empty, then also exclude the indexes inserted it
+    if exclude != "" and regex != "":
+        index_list.filter_by_regex(kind=regex, value=exclude, exclude=True)
+        index_list.filter_by_age(source='creation_date', direction='older', unit='days', unit_count=days)
+    else:
+        index_list.filter_by_age(source='creation_date', direction='older', unit='days', unit_count=days)
+
 
     # Delete indexes
     print("Found %s indexes to delete" % len(index_list.indices))
